@@ -1,39 +1,41 @@
-from flask import Flask, render_template, request
 import pickle
+from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-# Load the trained model and vectorizer
-try:
-    model = pickle.load(open('model.pkl', 'rb'))
-    tfidf_vectorizer = pickle.load(open('tfidf_vectorizer.pkl', 'rb'))
-except Exception as e:
-    print("Error loading model/vectorizer:", e)
-    model = None
-    tfidf_vectorizer = None
+# Load the trained model
+with open("model.pkl", "rb") as f:
+    model = pickle.load(f)
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+# Load the vectorizer
+with open("tfidf_vectorizer.pkl", "rb") as f:
+    vectorizer = pickle.load(f)
 
-@app.route('/detect', methods=['POST'])
-def detect_plagiarism():
-    input_text = request.form['text']
+@app.route("/")
+def home():
+    return render_template("index.html")  # Ensure index.html is inside the 'templates' folder
 
-    # Check if vectorizer and model are loaded
-    if model is None or tfidf_vectorizer is None:
-        return render_template('index.html', result="Error: Model or Vectorizer not loaded. Retrain the model.")
+@app.route("/detect", methods=["POST"])
+def detect():
+    text = request.form.get("text", "")
 
-    # Ensure vectorizer is fitted
-    if not hasattr(tfidf_vectorizer, "idf_"):
-        return render_template('index.html', result="Error: Vectorizer not fitted. Retrain the model.")
+    if not text:
+        return render_template("index.html", result="No text provided.")
 
-    # Transform input text and predict
-    vectorized_text = tfidf_vectorizer.transform([input_text])
-    result = model.predict(vectorized_text)
+    try:
+        # Transform the input text using the fitted vectorizer
+        text_vectorized = vectorizer.transform([text])
 
-    result = "Plagiarism Detected" if result[0] == 1 else "No Plagiarism"
-    return render_template('index.html', result=result)
+        # Make a prediction using the trained model
+        prediction = model.predict(text_vectorized)[0]  # Assuming output is 1 (Plagiarism) or 0 (No Plagiarism)
+
+        # Interpret the prediction result
+        result = "Plagiarism Detected 🚨" if prediction == 1 else "No Plagiarism Found ✅"
+
+        return render_template("index.html", result=result)
+
+    except Exception as e:
+        return render_template("index.html", result=f"Error: {str(e)}")
 
 if __name__ == "__main__":
     app.run(debug=True)
