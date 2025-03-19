@@ -8,7 +8,7 @@ Plagiarism detection is a crucial task in educational and professional settings.
 
 The first step in building our plagiarism detector is gathering a comprehensive dataset. The dataset should consist of text documents that contain both original and plagiarized content. You can find such datasets from online sources like Kaggle or create your own by manually collecting documents.
 
-Here, we use a hypothetical dataset containing pairs of text where each pair includes one original document and one plagiarized version of MIT-Plagiarized dataset. This dataset will help train our machine learning model to distinguish between original and copied content.
+Here, we use a hypothetical dataset containing pairs of text where each pair includes one original document and one plagiarized version of MIT-Plagiarized Dataset. This dataset will help train our machine learning model to distinguish between original and copied content.
 
 
 # Preprocessing the Data
